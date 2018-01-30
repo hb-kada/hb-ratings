@@ -58,20 +58,30 @@ class Rating(db.Model):
     __tablename__ = "ratings"
 
     rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    movie_id = db.Column(db.Integer, db.ForeignKey("movies.movie_id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id",
+                                                  ondelete="CASCADE"),
+                        nullable=False)
+
+    movie_id = db.Column(db.Integer, db.ForeignKey("movies.movie_id",
+                                                   ondelete="CASCADE"),
+                         nullable=False)
+
     rating = db.Column(db.Integer, nullable=False)
 
-    users = db.relationship('User', backref=db.backref('ratings', order_by=rating_id))
-    movies = db.relationship('Movie', backref=db.backref('ratings', order_by=rating_id))
+    users = db.relationship('User', backref=db.backref('ratings',
+                                                       order_by=rating_id))
+
+    movies = db.relationship('Movie', backref=db.backref('ratings',
+                                                         order_by=rating_id))
 
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<Rating rating_id={} user_id={} movie_id={} rating={}>".format(self.rating_id,
-                                                                               self.user_id,
-                                                                               self.movie_id,
-                                                                               self.rating)
+        return "<Rating rating_id={} user_id={} movie_id={} rating={}>" \
+            .format(self.rating_id,
+                    self.user_id,
+                    self.movie_id,
+                    self.rating)
 
 
 ##############################################################################
