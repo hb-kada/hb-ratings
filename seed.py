@@ -45,12 +45,10 @@ def load_movies():
     # we won't be trying to add duplicate movies
     Movie.query.delete()
 
-    num_chars_to_del = 38
-
     for row in open("seed_data/u.item"):
         row = row.rstrip()
-        row = row[:-num_chars_to_del]
-        movie_id, movie_title, released_on, vid_release, imdb_url = row.split('|')
+        split_row = row.split('|')
+        movie_id, movie_title, released_on, vid_release, imdb_url = split_row[:5]
 
         movie_title = movie_title[:-7]
 
