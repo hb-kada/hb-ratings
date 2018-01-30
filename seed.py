@@ -18,7 +18,6 @@ def load_users():
     # Delete all rows in table, so if we need to run this a second time,
     # we won't be trying to add duplicate users
     User.query.delete()
-    db.session.commit()
 
     # Read u.user file and insert data
     for row in open("seed_data/u.user"):
