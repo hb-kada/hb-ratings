@@ -84,6 +84,9 @@ def process_login_form():
 
     if is_email_exists and is_password_match:
         print "User email and password match"
+
+        #TODO: Add user id to session.
+
         return redirect('/')
     else:
         print "User email not found OR password doesn't match."
