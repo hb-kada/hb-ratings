@@ -52,6 +52,9 @@ def load_movies():
 
         movie_title = movie_title[:-7]
 
+        #decoding latin-1 to unicode
+        movie_title = move_title.decode("latin-1")
+
         if released_on:
             released_on = datetime.datetime.strptime(released_on, "%d-%b-%Y")
         else:
