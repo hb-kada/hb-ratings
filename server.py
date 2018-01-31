@@ -44,13 +44,18 @@ def process_registration_form():
     submitted_password = request.form.get('password')
 
     # Create hash of password before it is stored in database
-    hashed_pw = bcrypt.hashpw(submitted_password.encode('utf-8'), bcrypt.gensalt())
+    hashed_pw = bcrypt.hashpw(submitted_password.encode('utf-8'),
+                              bcrypt.gensalt())
 
-    is_email_exists = (db.session.query(User.email).filter(User.email == submitted_email).first())
-    print is_email_exists
+    # Create bool if submitted password exists or not
+    is_email_exists = bool((db.session.query(User.email)
+                            .filter(User.email == submitted_email).first()))
+
+    # If email exists, user can't register it again. Return to login page.
     if is_email_exists:
         flash("Email already registered.")
         return redirect('/register')
+    # Otherwise, register account by adding new user to DB; send to homepage.
     else:
         new_user = User(email=submitted_email, password=hashed_pw)
         db.session.add(new_user)
@@ -61,7 +66,6 @@ def process_registration_form():
 @app.route('/login', methods=['GET'])
 def show_login_form():
     """Display login form."""
-
     return render_template("login_form.html")
 
 
@@ -72,14 +76,17 @@ def process_login_form():
     login_email = request.form.get('email')
     login_password = request.form.get('password')
 
+    # Retrieve user object with corresponding email.
     user = (db.session.query(User).filter(User.email == login_email).first())
-    print user
 
+    # If we found a user...
     if user:
+        # Create bool to signal whether submitted password matches
+        # password hash in db.
+        is_password_match = bcrypt.checkpw(login_password.encode('utf-8'),
+                                           user.password.encode('utf-8'))
 
-        # checks if submitted password matches password hash in db. returns boolean
-        is_password_match = bcrypt.checkpw(login_password.encode('utf-8'), user.password.encode('utf-8'))
-
+        # If password does match, log in user.
         if is_password_match:
             print "User email and password match"
 
@@ -88,10 +95,12 @@ def process_login_form():
             flash("You are logged in!")
 
             return redirect('/users/' + str(user.user_id))
+        # Otherwise, flash error and redirect to login form.
         else:
             flash("Login unsuccessful.")
             print session
             return redirect('/login')
+    # ...otherwise if user not found, flash error, and redirect to login form.
     else:
         flash("Login unsuccessful.")
         print session
@@ -101,18 +110,16 @@ def process_login_form():
 @app.route('/logout', methods=['POST'])
 def show_logout_form():
     """Logs the user out."""
-
+    # session['user'] signals that the user is logged in. Clear it to log out.
     del session['user']
-
     flash("Logged out!")
-
     return redirect('/')
 
 
 @app.route("/users")
 def user_list():
     """Show list of users."""
-
+    # Get all user objects to use in template.
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
@@ -120,19 +127,21 @@ def user_list():
 @app.route('/users/<user_id>')
 def show_user_details(user_id):
     """Shows details for individual user"""
-
+    # Get user object for specified user_id
     user = db.session.query(User).get(user_id)
 
-    # for rating_obj in user.ratings:
-    #     print rating_obj.movies.movie_title, rating_obj.rating
+    # Query to get list of tuples of all (movie_title, rating)
+    all_movie_ratings = db.session.query(Movie.movie_title,
+                                         Rating.rating,
+                                         Movie.movie_id).join(Rating)
 
-    #return list of tuples of all (movie_title, rating)
-    all_movie_ratings = db.session.query(Movie.movie_title, Rating.rating, Movie.movie_id).join(Rating)
+    # Filters query by a single user and fetches those (movie_title, rating)
+    movie_ratings_by_user = all_movie_ratings \
+        .filter(Rating.user_id == user_id).all()
 
-    #filtered by a single user
-    movie_ratings_by_user = all_movie_ratings.filter(Rating.user_id == user_id).all()
-
-    return render_template('user_details.html', user=user, movie_ratings=movie_ratings_by_user)
+    return render_template('user_details.html',
+                           user=user,
+                           movie_ratings=movie_ratings_by_user)
 
 
 @app.route("/movies")
@@ -149,13 +158,15 @@ def show_movie_details(movie_id):
 
     movie = db.session.query(Movie).get(movie_id)
 
-    #list of tuples for all movies with (user_id, rating)
+    # Query to get list of tuples for all movies with (user_id, rating)
     all_movie_ratings = db.session.query(Rating.user_id, Rating.rating)
 
-    #filters by a single movie
+    # Filters by the specified movie_id and fetches those tuples.
     movie_ratings = all_movie_ratings.filter(Rating.movie_id == movie_id).all()
 
-    return render_template('movie_details.html', movie=movie, movie_ratings=movie_ratings)
+    return render_template('movie_details.html',
+                           movie=movie,
+                           movie_ratings=movie_ratings)
 
 
 if __name__ == "__main__":
@@ -171,5 +182,5 @@ if __name__ == "__main__":
     DebugToolbarExtension(app)
 
     # app.run()
-    
+
     app.run(port=5000, host='0.0.0.0')
