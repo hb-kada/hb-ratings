@@ -195,6 +195,42 @@ def add_rating():
 
     return redirect('/movies/' + movie_id)
 
+@app.route('/update-info', methods=['GET'])
+def show_update_info_page():
+    """Shows form to update user info"""
+
+    if session.get('user'):
+        return render_template('update_info.html')
+    else:
+        flash("Please login to update your profile.")
+        return redirect('/login')
+
+@app.route('/update-info', methods=['POST'])
+def update_user_info():
+    """Update user info in database"""
+
+    age = request.form.get('age')
+    gender = request.form.get('gender')
+    occupation = request.form.get('occupation')
+    zipcode = request.form.get('zipcode')
+
+    user_id = session.get('user')
+
+    user = db.session.query(User).get(user_id)
+
+    if age:
+        user.age = age
+    if gender:
+        user.gender = gender
+    if occupation:
+        user.occupation = occupation
+    if zipcode:
+        user.zipcode = zipcode
+
+    db.session.commit()
+
+    return redirect('/users/' + str(user_id))
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
