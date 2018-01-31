@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Update your account info</h1>
+
+<form action="/update-info" method='POST'>
+    <label>Gender:
+        <select name="gender">
+            <option value="M">Male</option>
+            <oppion value="F">Female</oppion>
+            <option value="O">Other</option>
+        </select>
+    </label>
+    <label>Age:
+        <input type='number' name='age' id='age_field'>
+    </label>
+    <label>Occupation:
+        <input type='text' name='occupation' id='occupation_field'>
+    </label>
+    <label>Zipcode:
+        <input type='text' name='zipcode' id='zipcode_field'>
+    </label>
+    <input type='submit'>
+</form>
+
+{% endblock %}
