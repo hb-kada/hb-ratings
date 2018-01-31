@@ -8,6 +8,16 @@
   Release date: {{ movie.released_on }}<br>
   <a href='{{ movie.imdb_url }}'>IMDB link</a><br>
 
+  {% if session.get('user') %}
+      
+      <h3>Rate {{ movie.movie_title }}</h3>
+      <form action='/add-rating' method='POST'>
+          <input type="number" min="1" max="5" name="user_rating">
+          <input type="submit" value="Submit your rating">
+          <input type="hidden" value="{{ movie.movie_id }}" name="movie_id">
+      </form>
+  {% endif %}
+
   User ratings:
   <ul>
     {% for user_id, rating in movie_ratings %}

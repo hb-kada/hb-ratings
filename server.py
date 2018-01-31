@@ -169,6 +169,31 @@ def show_movie_details(movie_id):
                            movie_ratings=movie_ratings)
 
 
+@app.route('/add-rating', methods=['POST'])
+def add_rating():
+    """Allows a logged-in user to add a rating."""
+
+    user_rating = request.form.get('user_rating')
+    movie_id = request.form.get('movie_id')
+    user_id = session.get('user')
+
+    # Gets rating object for specific user and movie
+    rating_entry = db.session.query(Rating) \
+        .filter((Rating.user_id == user_id),
+                (Rating.movie_id == movie_id)).first()
+
+    # If rating entry exists, updates rating
+    if rating_entry:
+        rating_entry.rating = user_rating
+        db.session.commit()
+    # Else adds new rating to database    
+    else:
+        new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
+
+        db.session.add(new_rating)
+        db.session.commit()
+
+
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
