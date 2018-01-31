@@ -169,6 +169,69 @@ def show_movie_details(movie_id):
                            movie_ratings=movie_ratings)
 
 
+@app.route('/add-rating', methods=['POST'])
+def add_rating():
+    """Allows a logged-in user to add a rating."""
+
+    user_rating = request.form.get('user_rating')
+    movie_id = request.form.get('movie_id')
+    user_id = session.get('user')
+
+    # Gets rating object for specific user and movie
+    rating_entry = db.session.query(Rating) \
+        .filter((Rating.user_id == user_id),
+                (Rating.movie_id == movie_id)).first()
+
+    # If rating entry exists, updates rating
+    if rating_entry:
+        rating_entry.rating = user_rating
+        db.session.commit()
+    # Else adds new rating to database
+    else:
+        new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
+
+        db.session.add(new_rating)
+        db.session.commit()
+
+    return redirect('/movies/' + movie_id)
+
+@app.route('/update-info', methods=['GET'])
+def show_update_info_page():
+    """Shows form to update user info"""
+
+    if session.get('user'):
+        return render_template('update_info.html')
+    else:
+        flash("Please login to update your profile.")
+        return redirect('/login')
+
+@app.route('/update-info', methods=['POST'])
+def update_user_info():
+    """Update user info in database"""
+
+    age = request.form.get('age')
+    gender = request.form.get('gender')
+    occupation = request.form.get('occupation')
+    zipcode = request.form.get('zipcode')
+
+    user_id = session.get('user')
+
+    user = db.session.query(User).get(user_id)
+
+    if age:
+        user.age = age
+    if gender:
+        user.gender = gender
+    if occupation:
+        user.occupation = occupation
+    if zipcode:
+        user.zipcode = zipcode
+
+    db.session.commit()
+
+    return redirect('/users/' + str(user_id))
+
+
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
