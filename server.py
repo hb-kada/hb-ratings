@@ -28,14 +28,6 @@ def index():
     return render_template("homepage.html")
 
 
-@app.route("/users")
-def user_list():
-    """Show list of users."""
-
-    users = User.query.all()
-    return render_template("user_list.html", users=users)
-
-
 @app.route("/register", methods=['GET'])
 def show_registration_form():
     """Display registration form"""
@@ -50,11 +42,10 @@ def process_registration_form():
     submitted_email = request.form.get('email')
     submitted_password = request.form.get('password')
 
-    #TODO: Add flash message telling user email already exists
-
     is_email_exists = (db.session.query(User.email).filter(User.email == submitted_email).first())
     print is_email_exists
     if is_email_exists:
+        flash("Email already registered.")
         return redirect('/register')
     else:
         new_user = User(email=submitted_email, password=submitted_password)
@@ -87,12 +78,11 @@ def process_login_form():
         if is_password_match:
             print "User email and password match"
 
-            #TODO: Add user id to session.
             session['user'] = user.user_id
             print session
             flash("You are logged in!")
 
-            return redirect('/')
+            return redirect('/users/' + str(user.user_id))
         else:
             flash("Login unsuccessful.")
             print session
@@ -112,6 +102,56 @@ def show_logout_form():
     flash("Logged out!")
 
     return redirect('/')
+
+
+@app.route("/users")
+def user_list():
+    """Show list of users."""
+
+    users = User.query.all()
+    return render_template("user_list.html", users=users)
+
+
+@app.route('/users/<user_id>')
+def show_user_details(user_id):
+    """Shows details for individual user"""
+
+    user = db.session.query(User).get(user_id)
+
+    # for rating_obj in user.ratings:
+    #     print rating_obj.movies.movie_title, rating_obj.rating
+
+    #return list of tuples of all (movie_title, rating)
+    all_movie_ratings = db.session.query(Movie.movie_title, Rating.rating, Movie.movie_id).join(Rating)
+
+    #filtered by a single user
+    movie_ratings_by_user = all_movie_ratings.filter(Rating.user_id == user_id).all()
+
+    return render_template('user_details.html', user=user, movie_ratings=movie_ratings_by_user)
+
+
+@app.route("/movies")
+def movie_list():
+    """Show list of movies."""
+
+    movies = Movie.query.order_by(Movie.movie_title).all()
+    return render_template("movie_list.html", movies=movies)
+
+
+@app.route('/movies/<movie_id>')
+def show_movie_details(movie_id):
+    """Shows details for a movie."""
+
+    movie = db.session.query(Movie).get(movie_id)
+
+    #list of tuples for all movies with (user_id, rating)
+    all_movie_ratings = db.session.query(Rating.user_id, Rating.rating)
+
+    #filters by a single movie
+    movie_ratings = all_movie_ratings.filter(Rating.movie_id == movie_id).all()
+
+    return render_template('movie_details.html', movie=movie, movie_ratings=movie_ratings)
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
