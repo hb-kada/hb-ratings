@@ -52,7 +52,7 @@ def process_registration_form():
 
     #TODO: Add flash message telling user email already exists
 
-    is_email_exists = db.session.query(User.email).filter(User.email == submitted_email).first()
+    is_email_exists = (db.session.query(User.email).filter(User.email == submitted_email).first())
     print is_email_exists
     if is_email_exists:
         return redirect('/register')
@@ -77,26 +77,41 @@ def process_login_form():
     login_email = request.form.get('email')
     login_password = request.form.get('password')
 
-    is_email_exists = db.session.query(User.email) \
-        .filter(User.email == login_email).first()
+    user = (db.session.query(User).filter(User.email == login_email).first())
+    print user
 
-    is_password_match = db.session.query(User.password).filter(User.email == login_email, login_password == User.password).first()
+    if user:
 
-    if is_email_exists and is_password_match:
-        print "User email and password match"
+        is_password_match = (user.password == login_password)
 
-        #TODO: Add user id to session.
+        if is_password_match:
+            print "User email and password match"
 
-        return redirect('/')
+            #TODO: Add user id to session.
+            session['user'] = user.user_id
+            print session
+            flash("You are logged in!")
+
+            return redirect('/')
+        else:
+            flash("Login unsuccessful.")
+            print session
+            return redirect('/login')
     else:
-        print "User email not found OR password doesn't match."
+        flash("Login unsuccessful.")
+        print session
         return redirect('/login')
 
-    # Check to see if email exists in users table
-        # AND check if corresponding password matches submitted password
-            # If so, log user in
-    # Else, redirect back to login page (with a flash later!)
 
+@app.route('/logout', methods=['POST'])
+def show_logout_form():
+    """Logs the user out."""
+
+    del session['user']
+
+    flash("Logged out!")
+
+    return redirect('/')
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the

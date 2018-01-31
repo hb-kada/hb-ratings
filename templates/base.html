@@ -6,9 +6,29 @@
 
 <body>
   Ratings
-  <hr>
 
-  {% block content %} put your content here {% endblock %}
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <hr>
+
+    {% block content %} put your content here {% endblock %}
+
+    {% if session.get('user') %}
+        <form action="/logout" method="POST">
+            <input type="submit" id="logout-button" value="Log Out">
+        </form>
+    {% else %}
+        <form action="/login" method="GET">
+            <input type="submit" id="login-button" value="Log In">
+        </form>
+    {% endif %}
 
 </body>
 </html>
