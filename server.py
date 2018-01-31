@@ -9,6 +9,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import User, Rating, Movie, connect_to_db, db
 
+import bcrypt
 
 app = Flask(__name__)
 
@@ -42,13 +43,16 @@ def process_registration_form():
     submitted_email = request.form.get('email')
     submitted_password = request.form.get('password')
 
+    # Create hash of password before it is stored in database
+    hashed_pw = bcrypt.hashpw(submitted_password.encode('utf-8'), bcrypt.gensalt())
+
     is_email_exists = (db.session.query(User.email).filter(User.email == submitted_email).first())
     print is_email_exists
     if is_email_exists:
         flash("Email already registered.")
         return redirect('/register')
     else:
-        new_user = User(email=submitted_email, password=submitted_password)
+        new_user = User(email=submitted_email, password=hashed_pw)
         db.session.add(new_user)
         db.session.commit()
         return redirect('/')
@@ -73,7 +77,8 @@ def process_login_form():
 
     if user:
 
-        is_password_match = (user.password == login_password)
+        # checks if submitted password matches password hash in db. returns boolean
+        is_password_match = bcrypt.checkpw(login_password.encode('utf-8'), user.password.encode('utf-8'))
 
         if is_password_match:
             print "User email and password match"
