@@ -186,12 +186,14 @@ def add_rating():
     if rating_entry:
         rating_entry.rating = user_rating
         db.session.commit()
-    # Else adds new rating to database    
+    # Else adds new rating to database
     else:
         new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
 
         db.session.add(new_rating)
         db.session.commit()
+
+    return redirect('/movies/' + movie_id)
 
 
 if __name__ == "__main__":
