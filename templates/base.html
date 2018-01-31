@@ -20,15 +20,26 @@
 
     {% block content %} put your content here {% endblock %}
 
-    {% if session.get('user') %}
-        <form action="/logout" method="POST">
-            <input type="submit" id="logout-button" value="Log Out">
-        </form>
-    {% else %}
-        <form action="/login" method="GET">
-            <input type="submit" id="login-button" value="Log In">
-        </form>
-    {% endif %}
 
 </body>
+<footer>
+
+<a href="/">Homepage</a>
+
+<a href='/movies'>Movies</a>
+
+<a href='/users'>Users</a>
+
+{% if session.get('user') %}
+  <a href="/users/{{ session.get('user') }}">Profile</a>
+  <a href='/logout'>Logout</a>
+{% else %}
+  <a href='/login'>Login</a>
+  <a href="/register">Register for an account</a>
+{% endif %}
+
+
+</div>
+
+</footer>
 </html>

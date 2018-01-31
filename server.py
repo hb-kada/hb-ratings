@@ -98,7 +98,7 @@ def process_login_form():
         return redirect('/login')
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout', methods=['GET'])
 def show_logout_form():
     """Logs the user out."""
 
