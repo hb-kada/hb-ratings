@@ -11,6 +11,8 @@
   Gender: {{ user.gender }}<br>
   Email: {{ user.email }}<br>
 
+  <a href='/update-info'>Update your user profile</a><br>
+
   Movies rated:
   <ul>
     {% for movie, rating, movie_id in movie_ratings %}
