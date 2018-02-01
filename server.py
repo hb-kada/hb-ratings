@@ -154,14 +154,20 @@ def show_movie_details(movie_id):
     user_id = session.get('user')
 
     if user_id:
-        user_rating = Rating.query.filter_by(
-            movie_id=movie_id, user_id=user_id).first()
-    else:
-        user_rating = None
+        movie_ratings = movie.ratings
+        for rating in movie_ratings:
+            if rating.user_id == user_id:
+                user_rating = rating
+
+        # user_rating = (movie.ratings.filter_by(user_id))
+        # Rating.query.filter_by(
+        #     movie_id=movie_id, user_id=user_id).first()
+            else:
+                user_rating = None
 
     # Get average rating of movie
 
-    rating_scores = [r.rating for r in movie.ratings]
+    rating_scores = [rating_obj.rating for rating_obj in movie.ratings]
     avg_rating = float(sum(rating_scores)) / len(rating_scores)
 
     prediction = None

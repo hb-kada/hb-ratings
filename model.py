@@ -56,11 +56,21 @@ class User(db.Model):
     def predict_rating(self, movie):
         """Predict user's rating of a movie."""
 
-        other_ratings = movie.ratings
+        movie_joined = movie.query.options(db.joinedload('ratings', 'users')).get(movie.movie_id)
+
+        other_ratings = movie_joined.ratings
+
+        users = [rating_obj.users for rating_obj in other_ratings]
+
+        for user in users:
+            print user.ratings
+
+        #TODO: Create an additional parameter to pass a joined "self"
+        # into similarity funciton
 
         similarities = [
-            (self.similarity(r.users), r)
-            for r in other_ratings
+            (self.similarity(rating_obj.users), rating_obj)
+            for rating_obj in other_ratings
         ]
 
         similarities.sort(reverse=True)
