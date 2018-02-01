@@ -128,7 +128,7 @@ def user_list():
 def show_user_details(user_id):
     """Shows details for individual user"""
 
-    #Creates user object joined to both ratings and movies
+    # Creates user object joined to both ratings and movies
     user = User.query.options(db.joinedload('ratings', 'movies')).get(user_id)
 
     return render_template('user_details.html',
@@ -147,8 +147,9 @@ def movie_list():
 def show_movie_details(movie_id):
     """Shows details for a movie."""
 
-    #Creates movie object joined to both ratings and users
-    movie = Movie.query.options(db.joinedload('ratings', 'users')).get(movie_id)
+    # Creates movie object joined to both ratings and users
+    movie = Movie.query.options(db.joinedload('ratings',
+                                              'users')).get(movie_id)
 
     user_id = session.get('user')
 
@@ -181,6 +182,7 @@ def show_movie_details(movie_id):
 
 # movie_ratings=movie_ratings,
 
+
 @app.route('/add-rating', methods=['POST'])
 def add_rating():
     """Allows a logged-in user to add a rating."""
@@ -199,10 +201,13 @@ def add_rating():
         rating_entry.rating = user_rating
     # Else adds new rating to database
     else:
-        new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
+        new_rating = Rating(user_id=user_id,
+                            movie_id=movie_id,
+                            rating=user_rating)
 
     db.session.commit()
     return redirect('/movies/' + movie_id)
+
 
 @app.route('/update-info', methods=['GET'])
 def show_update_info_page():
@@ -213,6 +218,7 @@ def show_update_info_page():
     else:
         flash("Please login to update your profile.")
         return redirect('/login')
+
 
 @app.route('/update-info', methods=['POST'])
 def update_user_info():
