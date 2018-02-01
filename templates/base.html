@@ -1,11 +1,13 @@
 <!doctype html>
 <html>
 <head>
-  <title>Ratings</title>
+  <title>
+    Ratings
+  </title>
 </head>
 
 <body>
-  Ratings
+  <a href='/'>Ratings</a>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -32,6 +34,7 @@
 
 {% if session.get('user') %}
   <a href="/users/{{ session.get('user') }}">Profile</a>
+  <a href="/update-info">Update profile</a>
   <a href='/logout'>Logout</a>
 {% else %}
   <a href='/login'>Login</a>

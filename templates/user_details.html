@@ -11,7 +11,9 @@
   Gender: {{ user.gender }}<br>
   Email: {{ user.email }}<br>
 
-  <a href='/update-info'>Update your user profile</a><br>
+  {% if user.user_id == session.get('user') %}
+    <a href='/update-info'>Update your user profile</a><br>
+  {% endif %}
 
   Movies rated:
   <ul>
