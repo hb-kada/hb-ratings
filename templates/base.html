@@ -1,8 +1,12 @@
 <!doctype html>
 <html>
 <head>
+  <title>
+    Ratings
+  </title>
+</head>
+<body>
   <title>Ratings</title>
-
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
@@ -16,8 +20,7 @@
 
 <body>
   <div class="container">
-    Ratings
-
+      <a href='/'>Ratings</a>
       {% with messages = get_flashed_messages() %}
         {% if messages %}
           <ul class="flashes">
@@ -40,6 +43,7 @@
         <li><a href='/users'>Users</a></li>
         {% if session.get('user') %}
           <li><a href="/users/{{ session.get('user') }}">Profile</a></li>
+          <li><a href="/update-info">Update profile</a></li>
           <li><a href='/logout'>Logout</a></li>
         {% else %}
           <li><a href='/login'>Login</a></li>
@@ -48,9 +52,6 @@
       </ul>
     </div>
   </nav>
-
-
 </div>
-
 </footer>
 </html>
