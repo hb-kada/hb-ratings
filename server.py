@@ -134,8 +134,6 @@ def show_user_details(user_id):
     return render_template('user_details.html',
                            user=user)
 
-    # movie_ratings=movie_ratings_by_user
-
 
 @app.route("/movies")
 def movie_list():
@@ -149,13 +147,8 @@ def movie_list():
 def show_movie_details(movie_id):
     """Shows details for a movie."""
 
-    movie = db.session.query(Movie).get(movie_id)
-
-    # Query to get list of tuples for all movies with (user_id, rating)
-    all_movie_ratings = db.session.query(Rating.user_id, Rating.rating)
-
-    # Filters by the specified movie_id and fetches those tuples.
-    movie_ratings = all_movie_ratings.filter(Rating.movie_id == movie_id).all()
+    #Creates movie object joined to both ratings and users
+    movie = Movie.query.options(db.joinedload('ratings', 'users')).get(movie_id)
 
     user_id = session.get('user')
 
@@ -182,11 +175,11 @@ def show_movie_details(movie_id):
 
     return render_template('movie_details.html',
                            movie=movie,
-                           movie_ratings=movie_ratings,
                            user_rating=user_rating,
                            average=avg_rating,
                            prediction=prediction)
 
+# movie_ratings=movie_ratings,
 
 @app.route('/add-rating', methods=['POST'])
 def add_rating():
