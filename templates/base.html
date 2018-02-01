@@ -1,48 +1,50 @@
 <!doctype html>
 <html>
 <head>
-  <title>
-    Ratings
-  </title>
+  <title>Ratings</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
 </head>
-
 <body>
-  <a href='/'>Ratings</a>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flashes">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    <hr>
-
-    {% block content %} put your content here {% endblock %}
-
-
+  <div class="container">
+      <a href='/'>Ratings</a>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+      <hr>
+      {% block content %} put your content here {% endblock %}
+  </div>
 </body>
 <footer>
-
-<a href="/">Homepage</a>
-
-<a href='/movies'>Movies</a>
-
-<a href='/users'>Users</a>
-
-{% if session.get('user') %}
-  <a href="/users/{{ session.get('user') }}">Profile</a>
-  <a href="/update-info">Update profile</a>
-  <a href='/logout'>Logout</a>
-{% else %}
-  <a href='/login'>Login</a>
-  <a href="/register">Register for an account</a>
-{% endif %}
-
-
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="/" class="navbar-brand">Homepage</a></li>
+        <li><a href='/movies'>Movies</a></li>
+        <li><a href='/users'>Users</a></li>
+        {% if session.get('user') %}
+          <li><a href="/users/{{ session.get('user') }}">Profile</a></li>
+          <li><a href="/update-info">Update profile</a></li>
+          <li><a href='/logout'>Logout</a></li>
+        {% else %}
+          <li><a href='/login'>Login</a></li>
+          <li><a href="/register">Register for an account</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
 </div>
-
 </footer>
 </html>
