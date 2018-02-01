@@ -15,14 +15,15 @@
     <a href='/update-info'>Update your user profile</a><br>
   {% endif %}
 
-  Movies rated:
   <ul>
-    {% for movie, rating, movie_id in movie_ratings %}
+    {% for rating in user.ratings %}
       <li>
           Movie: 
-          <a href="/movies/{{ movie_id }}">{{ movie }}</a> Rating: ({{ rating }})
+          <a href="/movies/{{ rating.movies.movie_id }}">{{ rating.movies.movie_title }}</a>
+          Rating: {{ rating.rating }}
       </li>
     {% endfor %}
   </ul>
+
 
 {% endblock %}

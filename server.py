@@ -127,21 +127,12 @@ def user_list():
 @app.route('/users/<user_id>')
 def show_user_details(user_id):
     """Shows details for individual user"""
-    # Get user object for specified user_id
-    user = db.session.query(User).get(user_id)
 
-    # Query to get list of tuples of all (movie_title, rating)
-    all_movie_ratings = db.session.query(Movie.movie_title,
-                                         Rating.rating,
-                                         Movie.movie_id).join(Rating)
-
-    # Filters query by a single user and fetches those (movie_title, rating)
-    movie_ratings_by_user = all_movie_ratings \
-        .filter(Rating.user_id == user_id).all()
+    # Creates user object joined to both ratings and movies
+    user = User.query.options(db.joinedload('ratings', 'movies')).get(user_id)
 
     return render_template('user_details.html',
-                           user=user,
-                           movie_ratings=movie_ratings_by_user)
+                           user=user)
 
 
 @app.route("/movies")
@@ -156,13 +147,9 @@ def movie_list():
 def show_movie_details(movie_id):
     """Shows details for a movie."""
 
-    movie = db.session.query(Movie).get(movie_id)
-
-    # Query to get list of tuples for all movies with (user_id, rating)
-    all_movie_ratings = db.session.query(Rating.user_id, Rating.rating)
-
-    # Filters by the specified movie_id and fetches those tuples.
-    movie_ratings = all_movie_ratings.filter(Rating.movie_id == movie_id).all()
+    # Creates movie object joined to both ratings and users
+    movie = Movie.query.options(db.joinedload('ratings',
+                                              'users')).get(movie_id)
 
     user_id = session.get('user')
 
@@ -190,10 +177,11 @@ def show_movie_details(movie_id):
 
     return render_template('movie_details.html',
                            movie=movie,
-                           movie_ratings=movie_ratings,
                            user_rating=user_rating,
                            average=avg_rating,
                            prediction=prediction)
+
+# movie_ratings=movie_ratings,
 
 
 @app.route('/add-rating', methods=['POST'])
@@ -214,11 +202,13 @@ def add_rating():
         rating_entry.rating = user_rating
     # Else adds new rating to database
     else:
-        new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
-        db.session.add(new_rating)
+        new_rating = Rating(user_id=user_id,
+                            movie_id=movie_id,
+                            rating=user_rating)
 
     db.session.commit()
     return redirect('/movies/' + movie_id)
+
 
 @app.route('/update-info', methods=['GET'])
 def show_update_info_page():
@@ -229,6 +219,7 @@ def show_update_info_page():
     else:
         flash("Please login to update your profile.")
         return redirect('/login')
+
 
 @app.route('/update-info', methods=['POST'])
 def update_user_info():
