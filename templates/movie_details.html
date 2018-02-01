@@ -14,8 +14,12 @@
     {% endif %}
 
   {% if session.get('user') %}
-      
-      <h3>Rate {{ movie.movie_title }}</h3>
+      {% if user_rating %}
+        <h3>You rated this movie: {{ user_rating.rating }}</h3>
+        <h3>Update your rating for {{ movie.movie_title }}</h3>
+      {% else %}
+        <h3>Rate {{ movie.movie_title }}</h3>
+      {% endif %}
       <form action='/add-rating' method='POST'>
           <input type="number" min="1" max="5" name="user_rating">
           <input type="submit" value="Submit your rating">

@@ -169,7 +169,6 @@ def show_movie_details(movie_id):
     if user_id:
         user_rating = Rating.query.filter_by(
             movie_id=movie_id, user_id=user_id).first()
-
     else:
         user_rating = None
 
@@ -186,6 +185,8 @@ def show_movie_details(movie_id):
         user = User.query.get(user_id)
         if user:
             prediction = user.predict_rating(movie)
+
+    # print "User rating is {}.".format(user_rating.rating)
 
     return render_template('movie_details.html',
                            movie=movie,
@@ -214,6 +215,7 @@ def add_rating():
     # Else adds new rating to database
     else:
         new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
+        db.session.add(new_rating)
 
     db.session.commit()
     return redirect('/movies/' + movie_id)
