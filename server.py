@@ -127,21 +127,14 @@ def user_list():
 @app.route('/users/<user_id>')
 def show_user_details(user_id):
     """Shows details for individual user"""
-    # Get user object for specified user_id
-    user = db.session.query(User).get(user_id)
 
-    # Query to get list of tuples of all (movie_title, rating)
-    all_movie_ratings = db.session.query(Movie.movie_title,
-                                         Rating.rating,
-                                         Movie.movie_id).join(Rating)
-
-    # Filters query by a single user and fetches those (movie_title, rating)
-    movie_ratings_by_user = all_movie_ratings \
-        .filter(Rating.user_id == user_id).all()
+    #Creates user object joined to both ratings and movies
+    user = User.query.options(db.joinedload('ratings', 'movies')).get(user_id)
 
     return render_template('user_details.html',
-                           user=user,
-                           movie_ratings=movie_ratings_by_user)
+                           user=user)
+
+    # movie_ratings=movie_ratings_by_user
 
 
 @app.route("/movies")
