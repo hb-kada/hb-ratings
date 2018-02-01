@@ -164,9 +164,35 @@ def show_movie_details(movie_id):
     # Filters by the specified movie_id and fetches those tuples.
     movie_ratings = all_movie_ratings.filter(Rating.movie_id == movie_id).all()
 
+    user_id = session.get('user')
+
+    if user_id:
+        user_rating = Rating.query.filter_by(
+            movie_id=movie_id, user_id=user_id).first()
+
+    else:
+        user_rating = None
+
+    # Get average rating of movie
+
+    rating_scores = [r.rating for r in movie.ratings]
+    avg_rating = float(sum(rating_scores)) / len(rating_scores)
+
+    prediction = None
+
+    # Prediction code: only predict if the user hasn't rated it.
+
+    if (not user_rating) and user_id:
+        user = User.query.get(user_id)
+        if user:
+            prediction = user.predict_rating(movie)
+
     return render_template('movie_details.html',
                            movie=movie,
-                           movie_ratings=movie_ratings)
+                           movie_ratings=movie_ratings,
+                           user_rating=user_rating,
+                           average=avg_rating,
+                           prediction=prediction)
 
 
 @app.route('/add-rating', methods=['POST'])
@@ -185,14 +211,11 @@ def add_rating():
     # If rating entry exists, updates rating
     if rating_entry:
         rating_entry.rating = user_rating
-        db.session.commit()
     # Else adds new rating to database
     else:
         new_rating = Rating(user_id=user_id, movie_id=movie_id, rating=user_rating)
 
-        db.session.add(new_rating)
-        db.session.commit()
-
+    db.session.commit()
     return redirect('/movies/' + movie_id)
 
 @app.route('/update-info', methods=['GET'])

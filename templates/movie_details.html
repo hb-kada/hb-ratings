@@ -8,6 +8,11 @@
   Release date: {{ movie.released_on }}<br>
   <a href='{{ movie.imdb_url }}'>IMDB link</a><br>
 
+  <p>Average rating: {{ average }}</p>
+    {% if prediction %}
+      <p>We predict you will rate this movie {{ prediction }}.</p>
+    {% endif %}
+
   {% if session.get('user') %}
       
       <h3>Rate {{ movie.movie_title }}</h3>
