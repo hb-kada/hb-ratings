@@ -153,6 +153,7 @@ def show_movie_details(movie_id):
 
     user_id = session.get('user')
 
+    # Bug if not logged in 
     if user_id:
         movie_ratings = movie.ratings
         for rating in movie_ratings:

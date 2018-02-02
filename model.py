@@ -1,7 +1,10 @@
 """Models and database functions for Ratings project."""
 
+import heapq
+import time
 from flask_sqlalchemy import SQLAlchemy
 import correlation
+from collections import defaultdict
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -53,39 +56,49 @@ class User(db.Model):
         else:
             return 0.0
 
+    # Courtesy of Henry
     def predict_rating(self, movie):
         """Predict user's rating of a movie."""
+        # import pdb; pdb.set_trace()
 
-        movie_joined = movie.query.options(db.joinedload('ratings', 'users')).get(movie.movie_id)
+        UserMovies = db.aliased(Rating)
 
-        other_ratings = movie_joined.ratings
+        MovieUsers = db.aliased(Rating)
 
-        users = [rating_obj.users for rating_obj in other_ratings]
+        query = db.session.query(Rating, UserMovies, MovieUsers) \
+            .join(UserMovies, UserMovies.movie_id == Rating.movie_id) \
+            .join(MovieUsers, Rating.user_id == MovieUsers.user_id) \
+            .filter(UserMovies.user_id == self.user_id) \
+            .filter(MovieUsers.movie_id == movie.movie_id)
 
-        for user in users:
-            print user.ratings
+        print query
 
-        #TODO: Create an additional parameter to pass a joined "self"
-        # into similarity funciton
+        known_ratings = {}
 
-        similarities = [
-            (self.similarity(rating_obj.users), rating_obj)
-            for rating_obj in other_ratings
-        ]
-
-        similarities.sort(reverse=True)
-
-        similarities = [(sim, r) for sim, r in similarities
-                        if sim > 0]
-
-        if not similarities:
-            return None
-
-        numerator = sum([r.rating * sim for sim, r in similarities])
-        denominator = sum([sim for sim, r in similarities])
+        paired_ratings = defaultdict(list)
+        for rating, user_movie, movie_user in query:
+            paired_ratings[rating.user_id].append((user_movie.rating, rating.rating))
+        
+            known_ratings[rating.user_id] = movie_user.rating
+        
+        similarities = []
+        print known_ratings
+        for _id, score in known_ratings.iteritems():
+            similarity = correlation.pearson(paired_ratings[_id])
+            print similarity
+            if similarity > 0:
+                similarities.append((similarity, score))
+                print similarities
+                if not similarities:
+                    return None
+        
+        numerator = sum([score * sim for sim, score in similarities])
+        print numerator
+        
+        denominator = sum([sim for sim, score in similarities])
+        print denominator
 
         return numerator/denominator
-
 
 # Put your Movie and Rating model classes here.
 
